@@ -1,36 +1,54 @@
 *{
   color: white;
 }
+.pop-instrument{
+  position: absolute;
+  width: 400px;
+  visibility: hidden;
+  background-color: gray;
+  top: 50px;
+  left:0px;
+  display: flex;
+  flex-wrap: wrap;
+  .instrument-item{
+    width: 100px;
+    height: 50px;
+  }
+}
 .app{
   box-sizing: border-box;
   width: 100vw;
   height: 100vh;
-  position: relative;
   user-select: none;
-  .box{
-    position: absolute;
-    top: 0;
-    right: 0; 
+  .menu{
     display: flex;
+    justify-content: space-evenly;
     align-items: center;
     height: 50px;
-    width: 400px;
+    width: 100vw;
     background: rgb(63, 63, 63);
     .mode{
       height: 50px;
       line-height: 50px;
       text-align: center;
-      flex: 1;
+      width: 100px;
+      background-color: black;
       cursor: pointer;
+      position: relative;
+    }
+    .dioHao{
+      display: flex;
+      align-items: center;
     }
     .text{
+      width: 90px;
       height: 50px;
       line-height: 50px;
-      text-align: center;
-      flex: 1;
+      text-align: right;
+      padding-right: 10px;
     }
     .input_range{
-      flex: 4;
+      width: 150px;
       -webkit-appearance: none;
       height: 0.5vh;
       border-radius: 1vh;

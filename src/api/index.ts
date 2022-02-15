@@ -4,7 +4,6 @@ export async function post(params: any = {}) {
     fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params)
     }).then(res => res.json()).then(res =>{
       resolve(res)
     }).catch(err => {
