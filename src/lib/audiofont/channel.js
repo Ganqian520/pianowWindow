@@ -1,5 +1,4 @@
 'use strict'
-console.log('WebAudioFont Channel v1.06 GPL3');
 export default function WebAudioFontChannel(audioContext) {
 	this.audioContext = audioContext;
 	this.bandEqualizer = function (from, frequency) {

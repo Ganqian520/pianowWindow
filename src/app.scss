@@ -3,7 +3,7 @@
 }
 .pop-instrument{
   position: absolute;
-  width: 400px;
+  width: 80vw;
   visibility: hidden;
   background-color: gray;
   top: 50px;
@@ -11,8 +11,10 @@
   display: flex;
   flex-wrap: wrap;
   .instrument-item{
-    width: 100px;
-    height: 50px;
+    width: 10vw;
+    height: 30px;
+    line-height: 30px;
+    overflow: hidden;
   }
 }
 .app{
@@ -31,6 +33,8 @@
       height: 50px;
       line-height: 50px;
       text-align: center;
+      white-space: nowrap;
+      // text-overflow: clip;
       width: 100px;
       background-color: black;
       cursor: pointer;

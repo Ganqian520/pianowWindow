@@ -1,5 +1,4 @@
 'use strict'
-console.log('WebAudioFont Player v2.92 GPL3');
 // var WebAudioFontLoader = require('./loader');
 // var WebAudioFontChannel = require('./channel');
 // var WebAudioFontReverberator = require('./reverberator')
@@ -71,7 +70,6 @@ function WebAudioFontPlayer() {
 		try {
 			if (audioContext.state == 'suspended') {
 				if (audioContext.constructor.name == 'AudioContext') {
-					console.log('audioContext.resume', audioContext);
 					audioContext.resume();
 				} else {
 					//skip
@@ -81,6 +79,7 @@ function WebAudioFontPlayer() {
 			//don't care
 		}
 	}
+  //播放
 	this.queueWaveTable = function (audioContext, target, preset, when, pitch, duration, volume, slides) {
 		this.resumeContext(audioContext);
 		volume = this.limitVolume(volume);
@@ -241,6 +240,7 @@ function WebAudioFontPlayer() {
 			this.adjustZone(audioContext, preset.zones[i]);
 		}
 	};
+  //设置zone的buffer
 	this.adjustZone = function (audioContext, zone) {
 		if (zone.buffer) {
 			//
@@ -293,6 +293,7 @@ function WebAudioFontPlayer() {
 			zone.sustain = this.numValue(zone.originalPitch, 0);
 		}
 	};
+  //从zones找到合适的zone
 	this.findZone = function (audioContext, preset, pitch) {
 		var zone = null;
 		for (var i = preset.zones.length - 1; i >= 0; i--) {

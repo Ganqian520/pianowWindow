@@ -12,8 +12,6 @@ export enum Cursor {  //鼠标类型
 
 export type Instrument = {  //乐器信息
   id:number,
-  file: string,
-  variable: string,
   en: string,
   cn: string
 }

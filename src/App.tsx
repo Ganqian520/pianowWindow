@@ -1,18 +1,15 @@
-import { useEffect} from 'react'
+import { useEffect } from 'react'
 import './app.scss'
-import { Music, Cursor,Instrument} from './types'
-import {instruments} from './lib/instruments'
+import { Music, Cursor, Instrument } from './types'
+import { instruments, classify, musics_ } from './lib/instruments'
 
 export default function App() {
 
 
-  let a = import.meta.globEager('./lib/audiofont/player.js')
-  let b = a['./lib/audiofont/player.js']
-  // let a = import.meta.globEager('./test.js')
-  // let b = a['./test.js']
-  let Player = b.WebAudioFontPlayer
-  let zones = {}
-  
+  let module = import.meta.globEager('./lib/audiofont/player.js')['./lib/audiofont/player.js']
+  let Player = module.WebAudioFontPlayer
+  let player = new Player()
+  let zones = {}  //js音频数据
   let canvas: HTMLCanvasElement
   let ctx: CanvasRenderingContext2D
   let unitW: number = 20  //最小格子宽高
@@ -22,16 +19,14 @@ export default function App() {
   let originY: number = -88 * unitH / 2 + 300
   let count: number = 1000 //方块横向个数，纵向为88
   let diaoHao: number = 1 //调号，1~24
-  let bpm = 120 //bpm
+  let bpm = 76 //bpm
   let isKeyX: boolean = false //键是否按下中
   let isKeyY: boolean = false
   let isMouseLeftDown = false
   let isMoved = false //判断是否移动过，移动过就不算作点击
   let isNumber = true //音符显示数字还是字母
   let isPlay = false //是否播放中
-  let musics: Music[] = [{ indexX: 0, indexY: 48, length: 4 }, { indexX: 4, indexY: 46, length: 4 }, { indexX: 8, indexY: 44, length: 4 },
-  { indexX: 12, indexY: 43, length: 4 }, { indexX: 16, indexY: 41, length: 4 }, { indexX: 20, indexY: 39, length: 4 }
-    , { indexX: 24, indexY: 37, length: 4 }, { indexX: 28, indexY: 36, length: 16 },] //音乐数据
+  let musics: Music[] = musics_ //音乐数据
   let newMusicLength = 4 //每次添加时的音乐时值
   let cursor: Cursor = Cursor.miss //鼠标类型
   let accX: number = 0 //鼠标累计移动
@@ -41,11 +36,9 @@ export default function App() {
   let indexY: number
   let interval: any //周期定时器，每隔16音符时长检查一下是否播放
   let current = 0 //当前播放位置
-  let breakPoints: number[] = [] //循环断点
-  let insIndex = 0 //乐器序号
-  let actx:AudioContext 
-  let player = new Player() 
-  let instrumentJS: null = null
+  let breakPoints: number[] = [1, 67] //循环断点
+  let insIndex = 73 //乐器序号
+  let actx: AudioContext = new AudioContext()
 
   useEffect(() => {
     init()
@@ -55,33 +48,23 @@ export default function App() {
   }, [])
 
   //加载乐器资源
-  async function loadIns(index = 0){
-    let instrument = instruments[index]
-    let path = `https://surikov.github.io/webaudiofontdata/sound/${instrument.file}`
-    setTimeout(() => {
-      console.log('2s')
-      actx = new AudioContext()
-      player.loader.decodeAfterLoading(actx, '_tone_0250_SoundBlasterOld_sf2')
-    }, 2000);
-    // player.loader.startLoad(actx, path, instrument.variable);
-    // player.loader.waitLoad = ()=>{
-    //   instrumentJS = (window as any)[instrument.variable]   
-    //   console.log('加载成功')
-    //   console.log(instrumentJS)
-    // }
-    // fetch(path).then(res=>{
-    //   console.log(res)
-    //   res.text()
-    // }).then(res=>{
-    //   console.log(res)
-    // })
-    // setInterval(() => {
-    //   console.log(player.loader.progress())
-    // }, 1000);
+  async function loadIns(index: number) {
+    let xml = new XMLHttpRequest()
+    let url = `https://static-db46e7bd-69d3-4f40-b4a6-53a94cd18f8c.bspapp.com/audiofont/a${index}.js`
+    // let url = `https://cdn.jsdelivr.net/gh/Ganqian520/audiofont/music/a${index}.js`
+    xml.open('GET', url, true)
+    xml.responseType = 'text'
+    xml.onload = (res) => {
+      let response = (res?.target as XMLHttpRequest).response
+      zones = { zones: eval(response) }
+      player.adjustPreset(actx, zones)
+      document.getElementById('ins-name')!.innerText = instruments[insIndex].cn
+    }
+    xml.send()
   }
   //发出声音
-  function makeSound(indexY: number, length: number) {
-    player.queueWaveTable(actx, actx.destination, zones, 0, 87-indexY, 60/bpm*length/4,0.5);
+  function makeSound(indexY: number, length: number, when = 0) {
+    player.queueWaveTable(actx, actx.destination, zones, when, 87 - indexY + 21, 60 / bpm * length / 4);
   }
   //点击播放,暂停
   function play() {
@@ -126,14 +109,14 @@ export default function App() {
     }
   }
   //监听鼠标悬停
-  function initInstrument(){
+  function initInstrument() {
     let div1 = document.getElementById('instrument')!
     let div2 = document.getElementById('pop-instrument')!
-    div1.onmouseenter = ()=>{
-      if(div2!=null) div2.style.visibility = 'visible'
+    div1.onmouseenter = () => {
+      if (div2 != null) div2.style.visibility = 'visible'
     }
-    div1.onmouseleave = ()=>{
-      if(div2!=null) div2.style.visibility = 'hidden'
+    div1.onmouseleave = () => {
+      if (div2 != null) div2.style.visibility = 'hidden'
     }
   }
   //初始化
@@ -153,8 +136,8 @@ export default function App() {
     window.oncontextmenu = (e) => {
       e.preventDefault()
     }
-    window.onresize = ()=>{
-      draw(0,0)
+    window.onresize = () => {
+      draw(0, 0)
     }
     let json: string | null = localStorage.getItem('music_list_pianowwindow')
     if (json) musics = JSON.parse(json)
@@ -203,7 +186,7 @@ export default function App() {
     let y = e.nativeEvent.offsetY
     //点击琴键
     if (e.button == 0 && x < squareA && y > squareA) {
-      let index = Math.floor((y  - squareA - originY) / unitH)
+      let index = Math.floor((y - squareA - originY) / unitH)
       makeSound(index, 4)
     }
     //控制断点
@@ -460,20 +443,6 @@ export default function App() {
       return `${list[remainder - 1]}${-4 + quotient + 5}`
     }
   }
-  //中央c为c4,
-  function calNote(index:number):string {
-    index = 88 - 1 - index
-    index += 10
-    let remainder = index % 12
-    let quotient = Math.floor(index / 12)
-    if (remainder == 0) {
-      remainder = 12
-      quotient -= 1
-    }
-    let list = ['C', 'Cs', 'D', 'Ds', 'E', 'F', 'Fs', 'G', 'Gs', 'A', 'As', 'B', 'C', 'Cs', 'D', 'E', 'Es', 'F', 'Fs', 'G', 'A', 'As', 'B', 'Bs']
-    // return `https://cdn.jsdelivr.net/gh/nbrosowsky/tonejs-instruments/samples/${instrument}/${list[remainder - 1]}${-4 + quotient + 4}.mp3`
-    return `${list[remainder - 1]}${-4 + quotient + 4}`
-  }
   //调号改变
   function diaoHaoChange(e: any) {
     let list = ["C大调", "#C大调", "D大调", "#D大调", "E大调", "F大调", "#F大调", "G大调", "#G大调", "A大调", "#A大调", "B大调",
@@ -495,28 +464,29 @@ export default function App() {
     document.getElementById('bpm')!.innerHTML = `bpm:${bpm}`
   }
   //切换乐器
-  function changeIns(i:number){
-    // instrument = i
-    // document.getElementById('ins-name')!.innerText= ins_cn[i]
-    // document.getElementById('pop-instrument')!.style.visibility = 'hidden'
-    // draw(0,0)
+  function changeIns(i: number) {
+    insIndex = i
+    document.getElementById('ins-name')!.innerText = '加载中...'
+    document.getElementById('pop-instrument')!.style.visibility = 'hidden'
+    loadIns(i)
+    draw(0, 0)
   }
 
   return (
     <div className="app">
       <div className="menu">
         <div id="instrument" className="mode">
-          <div id="ins-name">{}</div>
+          <div id="ins-name">加载中</div>
           <div className="pop-instrument" id="pop-instrument">
             {
-              instruments.map((v,i)=>{
+              instruments.map((v, i) => {
                 return (
-                  <div className="instrument-item" key={i} onClick={()=>(changeIns(i))}>{}</div>
+                  <div className="instrument-item" key={i} onClick={() => (changeIns(i))}>{instruments[i].cn}</div>
                 )
               })
             }
           </div>
-        </div>   
+        </div>
         <div id="play" className="mode" onClick={play}>播放</div>
         <div id="mode" className="mode" onClick={changeMode}>数字</div>
         <div className="dioHao">
@@ -524,12 +494,13 @@ export default function App() {
           <input className="input_range" min="1" max="24" onChange={diaoHaoChange} type="range" />
         </div>
         <div className="dioHao">
-          <div id="bpm" className="text">bpm：120</div>
+          <div id="bpm" className="text">bpm：76</div>
           <input className="input_range" min="60" max="200" onChange={bpmChange} type="range" />
         </div>
       </div>
-      <canvas id="canvas" onMouseDown={mousedown} onMouseMove={mousemove} onMouseUp={mouseup} onWheel={mousewheel}></canvas>
-      
+      <canvas id="canvas"
+        onMouseDown={mousedown} onMouseMove={mousemove} onMouseUp={mouseup} onWheel={mousewheel}></canvas>
+
     </div>
   )
 }

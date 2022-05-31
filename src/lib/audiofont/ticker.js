@@ -1,5 +1,4 @@
 'use strict'
-console.log('WebAudioFont Ticker v1.04 GPL3');
 
 function WebAudioFontTicker() {
 	var me = this;

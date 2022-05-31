@@ -1,5 +1,4 @@
 'use strict'
-console.log('WebAudioFont Reverberator v1.10 GPL3');
 function WebAudioFontReverberator(audioContext) {
 	//https://www.deeptronic.com/electronic-circuit-design/diy-reverb-pedal-circuit-from-spring-to-room-like-reverb-using-multiple-pt2399-ic-chips/
 	var me = this;
